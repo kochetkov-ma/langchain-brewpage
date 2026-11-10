@@ -21,7 +21,8 @@ from langchain_brewpage import BrewPageToolkit
 
 tools = BrewPageToolkit().get_tools()
 page = tools[0].invoke({"content": "# Weekly report\n\nAll green.", "format": "markdown"})
-print(page["url"])
+print(page["url"])              # page link, share it
+print(page["management_link"])  # private: edits or deletes the page
 ```
 
 With an agent (any tool-calling chat model):
@@ -44,6 +45,8 @@ agent.invoke({"messages": [{"role": "user", "content": "Write a one-page HTML ch
 | `brewpage_upload_file` (`BrewPageUploadFileTool`) | `POST /api/files` | Download or page URL for a local file |
 
 `BrewPageToolkit` returns all four with one shared client. Every tool also takes `ttl_days`, `password` and `namespace` and returns a dict with `url`, `id`, `namespace`, `owner_token`, `management_link`, `expires_at`. API errors (rate limits, refused content) reach the agent as tool messages, not exceptions.
+
+`url` is the page link. `management_link` is the management link with its key (`https://brewpage.app/manage/...#k=...`): anyone who has it can edit or delete the publication. The tool descriptions tell the agent to give the user both, to keep `owner_token` for later updates and show it on request, and never to post the management link or the token publicly (public page, repo, shared channel). `management_link` is `None` when the API returned an existing publication without a new key.
 
 The first call gets an owner token; the toolkit reuses it, so all publications share one owner. To keep it across runs, pass it in:
 

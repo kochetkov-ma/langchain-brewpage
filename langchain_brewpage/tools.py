@@ -14,6 +14,8 @@ _NS = ("Namespace: omit for a private unlisted link; 'public' lists pages in the
        "Never put secrets or personal data in 'public'.")
 _TTL = "Lifetime in days (1-30); omit for the 15-day default."
 _PASSWORD = "Optional password readers must enter."
+_HANDOFF = (" Give the user 'url' and 'management_link' (private: anyone who has it can edit or delete the "
+            "publication). Keep 'owner_token' for later updates; show it when asked. Never post either publicly.")
 
 
 class _CommonInput(BaseModel):
@@ -54,8 +56,8 @@ class _BrewPageTool(BaseTool):
 
 class BrewPagePublishPageTool(_BrewPageTool):
     name: str = "brewpage_publish_page"
-    description: str = ("Publish an HTML page or Markdown document on brewpage.app and get a shareable URL "
-                        "plus an owner token for later edits. No account needed.")
+    description: str = ("Publish an HTML page or Markdown document on brewpage.app and get a shareable URL. "
+                        "No account needed." + _HANDOFF)
     args_schema: Type[BaseModel] = PublishPageInput
 
     def _run(self, content: str, format: str = "html", ttl_days: Optional[int] = None,
@@ -66,7 +68,7 @@ class BrewPagePublishPageTool(_BrewPageTool):
 
 class BrewPagePublishJsonTool(_BrewPageTool):
     name: str = "brewpage_publish_json"
-    description: str = "Host a JSON document on brewpage.app and get a URL that serves it."
+    description: str = "Host a JSON document on brewpage.app and get a URL that serves it." + _HANDOFF
     args_schema: Type[BaseModel] = PublishJsonInput
 
     def _run(self, json_text: str, ttl_days: Optional[int] = None, password: Optional[str] = None,
@@ -80,7 +82,7 @@ class BrewPagePublishJsonTool(_BrewPageTool):
 
 class BrewPageCreateKvStoreTool(_BrewPageTool):
     name: str = "brewpage_create_kv_store"
-    description: str = "Create a key-value store on brewpage.app with one initial key; returns its URL."
+    description: str = "Create a key-value store on brewpage.app with one initial key; returns its URL." + _HANDOFF
     args_schema: Type[BaseModel] = CreateKvStoreInput
 
     def _run(self, key: str, value: str, ttl_days: Optional[int] = None, password: Optional[str] = None,
@@ -92,7 +94,7 @@ class BrewPageCreateKvStoreTool(_BrewPageTool):
 class BrewPageUploadFileTool(_BrewPageTool):
     name: str = "brewpage_upload_file"
     description: str = ("Upload a local file (image, PDF, archive, document, HTML or Markdown) to brewpage.app "
-                        "and get a download or page URL.")
+                        "and get a download or page URL." + _HANDOFF)
     args_schema: Type[BaseModel] = UploadFileInput
 
     def _run(self, path: str, ttl_days: Optional[int] = None, password: Optional[str] = None,

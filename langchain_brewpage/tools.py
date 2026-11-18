@@ -27,6 +27,12 @@ class _CommonInput(BaseModel):
 class PublishPageInput(_CommonInput):
     content: str = Field(description="HTML document or Markdown text to publish.")
     format: Literal["html", "markdown"] = Field(default="html", description="'html' or 'markdown'.")
+    state: Optional[Dict[str, Any]] = Field(default=None, description=(
+        "Page data settings for an HTML page, e.g. {'collections': {'answers': {}}}; {} enables defaults. "
+        "Omit or null to leave settings unchanged. Add the visitor SDK to the HTML before publishing."))
+    domain: Optional[str] = Field(default=None, description=(
+        "Owned hostname for an HTML page without a reader password. Requires this client's owner token "
+        "linked to a BrewPage profile. Follow custom_domain DNS records/nextStep; check notices if not attached."))
 
 
 class PublishJsonInput(_CommonInput):
@@ -61,9 +67,10 @@ class BrewPagePublishPageTool(_BrewPageTool):
     args_schema: Type[BaseModel] = PublishPageInput
 
     def _run(self, content: str, format: str = "html", ttl_days: Optional[int] = None,
-             password: Optional[str] = None, namespace: Optional[str] = None, **_: Any) -> Dict[str, Any]:
+             password: Optional[str] = None, namespace: Optional[str] = None,
+             state: Optional[Dict[str, Any]] = None, domain: Optional[str] = None, **_: Any) -> Dict[str, Any]:
         return self._call("publish_page", content=content, format=format, ttl_days=ttl_days,
-                          password=password, namespace=namespace)
+                          password=password, namespace=namespace, state=state, domain=domain)
 
 
 class BrewPagePublishJsonTool(_BrewPageTool):
